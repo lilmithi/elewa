@@ -9,7 +9,7 @@
             <div fxLayout="row" class="icon-block">
                 <span (click)="editBlock()" class="icons"><i class="far fa-edit"></i></span>
                 <span (click)="copyblock(block)" class="icons"><i class="far fa-clone"></i></span>
-                <span (click)="deleteBlock()" class="icons"><i class="far fa-trash-alt"></i></span>
+                <span (click)="deleteBlock()" [title]="stateSaved ? '':'save story'" class="icons" [ngClass]="{inactive: !stateSaved}"><i class="far fa-trash-alt"></i></span>
             </div>
         </div>
 
