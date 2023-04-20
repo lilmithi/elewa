@@ -14,7 +14,7 @@ import { Breadcrumb, Logger } from '@iote/bricks-angular';
 import { StoryEditorState, StoryEditorStateService } from '@app/state/convs-mgr/story-editor';
 
 import { HOME_CRUMB, STORY_EDITOR_CRUMB } from '@app/elements/nav/convl/breadcrumbs';
-
+import { StateSavedService } from '../../providers/state-saved.service';
 import { BlockPortalService } from '../../providers/block-portal.service';
 import { StoryEditorFrame } from '../../model/story-editor-frame.model';
 import { AddBotToChannelModal } from '../../modals/add-bot-to-channel-modal/add-bot-to-channel.modal';
@@ -58,6 +58,7 @@ export class StoryEditorPageComponent implements OnInit, OnDestroy {
               private _cd: ChangeDetectorRef,
               private _logger: Logger,
               private _blockPortalService: BlockPortalService,
+              private _stateSavedService: StateSavedService,
               _router: Router
   ) {
     this._editorStateService.get()
@@ -73,6 +74,7 @@ export class StoryEditorPageComponent implements OnInit, OnDestroy {
         this.loading.next(false);
       }
       );
+      // this._sb.sink = this._stateSavedService.savedStatus.subscribe(isSaved => console.log(`isSaved: ${isSaved}`))
   }
 
   ngOnInit() {
@@ -85,6 +87,7 @@ export class StoryEditorPageComponent implements OnInit, OnDestroy {
         this.opened = true;
       }
     });
+      this._stateSavedService.setSavedStatus(this.storyHasBeenSaved);
   }
 
   /**
@@ -173,6 +176,7 @@ this.zoom(this.frameZoom)
             this.storyHasBeenSaved = true;
           }
         });
+        this._stateSavedService.setSavedStatus(this.storyHasBeenSaved)
   }
 
   addToChannel() {
