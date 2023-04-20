@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, ViewChild, Input, OnInit, ViewContainerRef, ChangeDetectorRef, ComponentRef } from '@angular/core';
+import { Component, ElementRef, HostListener, ViewChild, Input, OnInit, ViewContainerRef, ChangeDetectorRef, ComponentRef, OnDestroy } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup } from '@angular/forms';
 import { CdkPortal } from '@angular/cdk/portal';
 
@@ -41,6 +41,8 @@ import { _CreateEventBlockForm } from '../../model/event-block-form.model';
 
 import { BlockInjectorService } from '../../providers/block-injector.service';
 import { SidemenuToggleService } from '@app/elements/layout/page-convl';
+import { StateSavedService } from '@app/features/convs-mgr/stories/editor';
+import { SubSink } from 'subsink';
 /**
  * Block which sends a message from bot to user.
  */
@@ -49,7 +51,7 @@ import { SidemenuToggleService } from '@app/elements/layout/page-convl';
   templateUrl: 'block.component.html',
   styleUrls: ['./block.component.scss']
 })
-export class BlockComponent implements OnInit {
+export class BlockComponent implements OnInit, OnDestroy {
   @Input() id: string;
   @Input() block: StoryBlock;
   @Input() blocksGroup: FormArray;
@@ -85,7 +87,8 @@ export class BlockComponent implements OnInit {
   keywordJumpType = StoryBlockTypes.keyword;
   eventType = StoryBlockTypes.Event;
 
-
+  private _sbS = new SubSink()
+  stateSaved:boolean;
   blockFormGroup: FormGroup;
 
   iconClass = ''
@@ -101,8 +104,11 @@ export class BlockComponent implements OnInit {
               private _blockInjectorService: BlockInjectorService,
               private _connectionsService: BlockConnectionsService,
               private _logger: Logger,
-              private sideMenu:SidemenuToggleService
-  ) { }
+              private sideMenu:SidemenuToggleService,
+              private _stateSavedService:StateSavedService
+  ) { 
+   this._sbS.sink = this._stateSavedService.savedStatus.subscribe(isSaved=>this.stateSaved=isSaved)
+  }
 
   ngOnInit(): void {
     this.type = this.block.type;
@@ -294,12 +300,17 @@ export class BlockComponent implements OnInit {
   }
 
   deleteBlock() {
-    this.block.deleted = true;
-    this.blockFormGroup.value.deleted = true;
-    this._connectionsService.deleteBlockConnections(this.block);
-    const index = this.viewPort.indexOf(this.ref.hostView);
-    this.viewPort.remove(index);
-    this._cd.detectChanges();
+    if(this.stateSaved){
+      this.block.deleted = true;
+      this.blockFormGroup.value.deleted = true;
+      this._connectionsService.deleteBlockConnections(this.block);
+      const index = this.viewPort.indexOf(this.ref.hostView);
+      this.viewPort.remove(index);
+      this._cd.detectChanges();
+    }
+  }
+  ngOnDestroy(){
+    this._sbS.unsubscribe()
   }
 }
 
