@@ -63,6 +63,13 @@ mat-card {
 			}
 		}
 	}
+	.inactive {
+		cursor: not-allowed;
+		color: #cccccc !important;
+		&:hover {
+			color: #cccccc !important;
+		}
+	}
 }
 .hide-block {
 	display: none;
